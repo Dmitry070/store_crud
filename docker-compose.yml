@@ -1,0 +1,57 @@
+services:
+
+  nginx:
+    image: nginx:latest
+    container_name: store_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/html
+    depends_on:
+      - php
+    networks:
+      - store_network
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: store_php
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - store_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    container_name: store_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: store_crud
+      MYSQL_USER: store_user
+      MYSQL_PASSWORD: store_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/create_table.sql:/docker-entrypoint-initdb.d/01_create_table.sql
+      # ── НОВАЯ СТРОКА: подключаем конфиг кодировки ──
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - store_network
+
+volumes:
+  mysql_data:
+
+networks:
+  store_network:
+    driver: bridge
