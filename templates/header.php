@@ -176,11 +176,25 @@
 </head>
 <body>
 
-<!-- Навигация -->
+
 <nav>
     <div class="container">
-        <a href="index.php">🛒 Магазин (CRUD)</a>
-        <a href="index.php?action=create" class="btn btn-success">+ Добавить товар</a>
+        <a href="index.php">🏪 Магазин</a>
+        <div>
+            <?php
+            if (Auth::isLoggedIn()): ?>
+                <a href="index.php?action=create" style="margin-right: 15px;">➕ Добавить</a>
+                <span style="color: #95a5a6; margin-right: 10px;">
+                    👤 <?= htmlspecialchars(Auth::getUsername()) ?>
+                </span>
+                <a href="index.php?action=logout">🚪 Выйти</a>
+            <?php
+            else: ?>
+                <a href="index.php?action=login" style="margin-right: 10px;">🔑 Войти</a>
+                <a href="index.php?action=register">📝 Регистрация</a>
+            <?php
+            endif; ?>
+        </div>
     </div>
 </nav>
 

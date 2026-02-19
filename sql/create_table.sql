@@ -73,9 +73,9 @@ VALUES ('Ноутбук Lenovo ThinkPad', 'Надёжный ноутбук, 16GB
        ('Наушники Sony WH-1000XM5', 'Беспроводные, шумоподавление', 29990.00, 12);
 
 -- ── Тестовый администратор ──
--- Пароль: admin123 (захеширован через password_hash)
--- Этот хеш создан с помощью: password_hash('admin123', PASSWORD_BCRYPT)
+-- Хеш для пароля 'admin123', сгенерированный через:
+-- php -r "echo password_hash('admin123', PASSWORD_BCRYPT);"
 INSERT INTO users (username, email, password, role)
 VALUES ('admin', 'admin@store.ru',
-        '$2y$10$YourHashWillBeDifferentButThisIsAPlaceholderForNow000',
+        '$2y$10$WK7GSqmxRHVsDTR3P2pEEuglqHGrz0Eub9sISLaCFWABu9vRgfvTm',
         'admin');

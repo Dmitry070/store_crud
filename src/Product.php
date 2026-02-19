@@ -69,4 +69,28 @@ class Product
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute(['id' => $id]);
     }
+
+    /**
+     * Поиск товаров по названию и описанию
+     */
+    public function search(string $query): array
+    {
+
+        $sql = "SELECT * FROM products 
+                WHERE name LIKE :query1 
+                   OR description LIKE :query2 
+                ORDER BY created_at DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $searchTerm = '%' . $query . '%';
+
+        // Передаём одно и то же значение, но под разными именами
+        $stmt->execute([
+            'query1' => $searchTerm,
+            'query2' => $searchTerm,
+        ]);
+
+        return $stmt->fetchAll();
+    }
 }

@@ -2,16 +2,13 @@
 // ============================================
 // ШАБЛОН: Список всех товаров
 // ============================================
-// Переменные, доступные здесь:
-//   $products — массив всех товаров из БД
 ?>
 
-<!-- Уведомления об успехных действиях -->
+    <!-- Уведомления -->
 <?php
 if (isset($_GET['success'])): ?>
     <div class="alert alert-success">
         <?php
-        // Определяем текст уведомления по параметру success
         switch ($_GET['success']) {
             case 'created':
                 echo '✅ Товар успешно создан!';
@@ -28,18 +25,57 @@ if (isset($_GET['success'])): ?>
 <?php
 endif; ?>
 
-<h1>📦 Все товары (<?= count($products) ?>)</h1>
-<br>
+    <!-- ========== ФОРМА ПОИСКА (НОВОЕ) ========== -->
+    <div class="card">
+        <form method="GET" action="index.php">
+            <!-- action=list передаём скрытым полем, чтобы роутер знал что делать -->
+            <input type="hidden" name="action" value="list">
+
+            <div style="display: flex; gap: 10px;">
+                <input type="text"
+                       name="search"
+                       value="<?= htmlspecialchars($search ?? '') ?>"
+                       placeholder="🔍 Поиск по названию или описанию..."
+                       style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+
+                <button type="submit" class="btn btn-primary">🔍 Найти</button>
+
+                <?php
+                if (!empty($search)): ?>
+                    <a href="index.php?action=list" class="btn btn-danger">✖ Сбросить</a>
+                <?php
+                endif; ?>
+            </div>
+        </form>
+    </div>
+    <br>
+    <!-- ========== КОНЕЦ ФОРМЫ ПОИСКА ========== -->
+
+<?php
+if (!empty($search)): ?>
+    <h1>🔍 Результаты поиска: «<?= htmlspecialchars($search) ?>» (<?= count($products) ?>)</h1>
+<?php
+else: ?>
+    <h1>📦 Все товары (<?= count($products) ?>)</h1>
+<?php
+endif; ?>
+    <br>
 
 <?php
 if (empty($products)): ?>
-    <!-- Если товаров нет -->
     <div class="card">
-        <p>Товаров пока нет. <a href="index.php?action=create">Добавьте первый!</a></p>
+        <?php
+        if (!empty($search)): ?>
+            <p>Ничего не найдено по запросу «<?= htmlspecialchars($search) ?>».
+                <a href="index.php?action=list">Показать все товары</a></p>
+        <?php
+        else: ?>
+            <p>Товаров пока нет. <a href="index.php?action=create">Добавьте первый!</a></p>
+        <?php
+        endif; ?>
     </div>
 <?php
 else: ?>
-    <!-- Таблица товаров -->
     <table>
         <thead>
         <tr>
@@ -56,39 +92,32 @@ else: ?>
         foreach ($products as $item): ?>
             <tr>
                 <td><?= $item['id'] ?></td>
-
-                <!-- htmlspecialchars() — защита от XSS-атак -->
-                <!-- Превращает спецсимволы в безопасные HTML-сущности -->
-                <!-- Например: <script> → &lt;script&gt; -->
                 <td>
                     <a href="index.php?action=show&id=<?= $item['id'] ?>">
                         <?= htmlspecialchars($item['name']) ?>
                     </a>
                 </td>
-
-                <!-- number_format() — форматирует число -->
-                <!-- (число, знаков после запятой, разделитель дробной части, разделитель тысяч) -->
                 <td><?= number_format($item['price'], 2, '.', ' ') ?> ₽</td>
-
                 <td><?= $item['quantity'] ?> шт.</td>
-
                 <td><?= date('d.m.Y H:i', strtotime($item['created_at'])) ?></td>
-
                 <td>
-                    <!-- Ссылка на редактирование -->
-                    <a href="index.php?action=edit&id=<?= $item['id'] ?>"
-                       class="btn btn-warning">✏️</a>
+                    <?php
+                    if (Auth::isLoggedIn()): ?>
+                        <a href="index.php?action=edit&id=<?= $item['id'] ?>"
+                           class="btn btn-warning">✏️</a>
+                    <?php
+                    endif; ?>
 
-                    <!-- Форма удаления (POST-запрос) -->
-                    <!-- Удаление через форму, а не ссылку — это безопаснее -->
-                    <form method="POST" action="index.php?action=delete"
-                          style="display:inline;"
-                          onsubmit="return confirm('Удалить товар?')">
-
-                        <!-- Скрытое поле с ID товара -->
-                        <input type="hidden" name="id" value="<?= $item['id'] ?>">
-                        <button type="submit" class="btn btn-danger">🗑️</button>
-                    </form>
+                    <?php
+                    if (Auth::isAdmin()): ?>
+                        <form method="POST" action="index.php?action=delete"
+                              style="display:inline;"
+                              onsubmit="return confirm('Удалить товар?')">
+                            <input type="hidden" name="id" value="<?= $item['id'] ?>">
+                            <button type="submit" class="btn btn-danger">🗑️</button>
+                        </form>
+                    <?php
+                    endif; ?>
                 </td>
             </tr>
         <?php

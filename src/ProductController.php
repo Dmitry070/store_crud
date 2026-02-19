@@ -15,11 +15,20 @@ class ProductController
 
     public function index(): void
     {
-        $products = $this->product->getAll();
+        // Получаем поисковый запрос из URL (например ?search=ноутбук)
+        $search = trim($_GET['search'] ?? '');
+
+        // Если есть запрос — ищем, иначе показываем все
+        if ($search !== '') {
+            $products = $this->product->search($search);
+        } else {
+            $products = $this->product->getAll();
+        }
 
         $pageTitle = 'Список товаров';
         $this->render('list', [
             'products' => $products,
+            'search' => $search,  // передаём в шаблон, чтобы показать в поле
         ]);
     }
 
@@ -42,6 +51,8 @@ class ProductController
 
     public function create(): void
     {
+        Auth::requireLogin();
+
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -63,6 +74,8 @@ class ProductController
 
     public function edit(): void
     {
+        Auth::requireLogin();
+
         $id = (int)($_GET['id'] ?? 0);
         $item = $this->product->getById($id);
         $errors = [];
@@ -78,7 +91,7 @@ class ProductController
             $errors = $this->validator->validateProduct($data);
 
             if (empty($errors)) {
-                $this->product->update($data);
+                $this->product->update($id, $data);
                 $this->redirect("index.php?action=show&id=$id&success=updated");
                 return;
             }
@@ -96,6 +109,8 @@ class ProductController
 
     public function delete(): void
     {
+        Auth::requireLogin();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)($_GET['id'] ?? 0);
             $this->product->delete($id);

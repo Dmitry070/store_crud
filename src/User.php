@@ -19,7 +19,7 @@ class User
     {
         $sql = "SELECT * FROM users WHERE username = :username";
         $stmt = $this->pdo->prepare($sql);
-        $stmt = execute(['username' => $username]);
+        $stmt->execute(['username' => $username]);
         return $stmt->fetch();
     }
 
@@ -31,7 +31,7 @@ class User
     {
         $sql = "SELECT * FROM users WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt = execute(['id' => $id]);
+        $stmt->execute(['id' => $id]);
         return $stmt->fetch();
     }
 
