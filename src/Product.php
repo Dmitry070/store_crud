@@ -13,14 +13,20 @@ class Product
 
     public function getAll(): array
     {
-        $sql = "SELECT * FROM products ORDER BY created_at DESC";
+        $sql = "SELECT p.*, c.name AS category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                ORDER BY p.created_at DESC";
         $stmt = $this->pdo->query($sql);
         return $stmt->fetchAll();
     }
 
     public function getById(int $id): array|false
     {
-        $sql = "SELECT * FROM products WHERE id = :id";
+        $sql = "SELECT p.*, c.name AS category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
         return $stmt->fetch();
@@ -28,8 +34,8 @@ class Product
 
     public function create(array $data): int
     {
-        $sql = "INSERT INTO products (name, description, price, quantity)
-                VALUES (:name, :description, :price, :quantity)";
+        $sql = "INSERT INTO products (name, description, price, quantity, category_id)
+                VALUES (:name, :description, :price, :quantity, :category_id)";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -38,6 +44,7 @@ class Product
             'description' => $data['description'],
             'price' => $data['price'],
             'quantity' => $data['quantity'],
+            'category_id' => $data['category_id'] ?: null,
         ]);
 
         return (int)$this->pdo->lastInsertId();
@@ -49,7 +56,8 @@ class Product
                 SET name = :name,
                     description = :description,
                     price = :price,
-                    quantity = :quantity
+                    quantity = :quantity,
+                    category_id = :category_id
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
@@ -60,6 +68,7 @@ class Product
             'description' => $data['description'],
             'price' => $data['price'],
             'quantity' => $data['quantity'],
+            'category_id' => $data['category_id'] ?: null,
         ]);
     }
 
@@ -104,8 +113,10 @@ class Product
     {
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT * FROM products 
-                ORDER BY created_at DESC 
+        $sql = "SELECT p.*, c.name AS category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                ORDER BY p.created_at DESC 
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
@@ -133,21 +144,20 @@ class Product
     {
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT * FROM products 
-                WHERE name LIKE :query1 
-                   OR description LIKE :query2 
-                ORDER BY created_at DESC 
+        $sql = "SELECT p.*, c.name AS category_name 
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.name LIKE :query1 
+                   OR p.description LIKE :query2 
+                ORDER BY p.created_at DESC 
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
-
         $searchTerm = '%' . $query . '%';
-
         $stmt->bindValue(':query1', $searchTerm);
         $stmt->bindValue(':query2', $searchTerm);
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-
         $stmt->execute();
 
         return $stmt->fetchAll();

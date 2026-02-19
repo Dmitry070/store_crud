@@ -5,13 +5,16 @@ declare(strict_types=1);
 class ProductController
 {
     private Product $product;
+    private Category $category;
     private Validator $validator;
 
-    public function __construct(Product $product, Validator $validator)
+    public function __construct(Product $product, Category $category, Validator $validator)
     {
         $this->product = $product;
+        $this->category = $category;
         $this->validator = $validator;
     }
+
 
     public function index(): void
     {
@@ -65,6 +68,7 @@ class ProductController
         Auth::requireLogin();
 
         $errors = [];
+        $categories = $this->category->getAll();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = $this->getFormData();
@@ -80,6 +84,7 @@ class ProductController
         $pageTitle = 'Добавить товар';
         $this->render('create', [
             'errors' => $errors,
+            'categories' => $categories,
         ]);
     }
 
@@ -90,6 +95,7 @@ class ProductController
         $id = (int)($_GET['id'] ?? 0);
         $item = $this->product->getById($id);
         $errors = [];
+        $categories = $this->category->getAll();
 
         if (!$item) {
             http_response_code(404);
@@ -115,6 +121,7 @@ class ProductController
         $this->render('edit', [
             'item' => $item,
             'errors' => $errors,
+            'categories' => $categories,
         ]);
     }
 
@@ -137,6 +144,7 @@ class ProductController
             'description' => trim($_POST['description'] ?? ''),
             'price' => (float)($_POST['price'] ?? 0),
             'quantity' => (int)($_POST['quantity'] ?? 0),
+            'category_id' => (int)($_POST['category_id'] ?? 0),
         ];
     }
 

@@ -2,6 +2,26 @@ SET NAMES utf8mb4;
 SET
 CHARACTER SET utf8mb4;
 
+-- ══════════════════════════════════════
+-- КАТЕГОРИИ (создаём ПЕРВОЙ, т.к. products ссылается на неё)
+-- ═════════════════════════════════════���
+CREATE TABLE IF NOT EXISTS categories
+(
+    id
+    INT
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    name
+    VARCHAR
+(
+    255
+) NOT NULL UNIQUE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_unicode_ci;
+
+-- ══════════════════════════════════════
+-- ТОВАРЫ
+-- ══════════════════════════════════════
 CREATE TABLE IF NOT EXISTS products
 (
     id
@@ -21,10 +41,25 @@ CREATE TABLE IF NOT EXISTS products
     2
 ) NOT NULL DEFAULT 0.00,
     quantity INT NOT NULL DEFAULT 0,
+    category_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- FOREIGN KEY — связь с таблицей categories
+    -- Если категорию удалят — у товара category_id станет NULL
+    FOREIGN KEY
+(
+    category_id
+) REFERENCES categories
+(
+    id
+)
+                                                   ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_unicode_ci;
 
+-- ══════════════════════════════════════
+-- ПОЛЬЗОВАТЕЛИ
+-- ══════════════════════════════════════
 CREATE TABLE IF NOT EXISTS users
 (
     id
@@ -32,45 +67,43 @@ CREATE TABLE IF NOT EXISTS users
     AUTO_INCREMENT
     PRIMARY
     KEY,
-
-    -- Логин (уникальный — два юзера с одним логином невозможны)
     username
     VARCHAR
 (
     100
 ) NOT NULL UNIQUE,
-
-    -- Email (тоже уникальный)
     email VARCHAR
 (
     255
 ) NOT NULL UNIQUE,
-
-    -- Хеш пароля (НЕ сам пароль!)
-    -- VARCHAR(255) — потому что хеш bcrypt длинный
-    -- Мы НИКОГДА не храним пароли в открытом виде!
     password VARCHAR
 (
     255
 ) NOT NULL,
-
-    -- Роль: admin или user
     role ENUM
 (
     'admin',
     'user'
 ) NOT NULL DEFAULT 'user',
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE =utf8mb4_unicode_ci;
 
--- ── Тестовые товары ──
-INSERT INTO products (name, description, price, quantity)
-VALUES ('Ноутбук Lenovo ThinkPad', 'Надёжный ноутбук, 16GB RAM, 512GB SSD', 75990.00, 15),
-       ('Монитор Samsung 27"', '4K UHD, IPS-матрица, 60Hz', 32500.00, 8),
-       ('Клавиатура Logitech K380', 'Беспроводная, Bluetooth, компактная', 3490.00, 45),
-       ('Мышь Razer DeathAdder', 'Игровая мышь, 20000 DPI, RGB', 4990.00, 30),
-       ('Наушники Sony WH-1000XM5', 'Беспроводные, шумоподавление', 29990.00, 12);
+-- ══════════════════════════════════════
+-- ТЕСТОВЫЕ ДАННЫЕ
+-- ══════════════════════════════════════
+INSERT INTO categories (name)
+VALUES ('Ноутбуки'),
+       ('Мониторы'),
+       ('Клавиатуры'),
+       ('Мыши'),
+       ('Наушники');
+
+INSERT INTO products (name, description, price, quantity, category_id)
+VALUES ('Ноутбук Lenovo ThinkPad', 'Надёжный ноутбук, 16GB RAM, 512GB SSD', 75990.00, 15, 1),
+       ('Монитор Samsung 27"', '4K UHD, IPS-матрица, 60Hz', 32500.00, 8, 2),
+       ('Клавиатура Logitech K380', 'Беспроводная, Bluetooth, компактная', 3490.00, 45, 3),
+       ('Мышь Razer DeathAdder', 'Игровая мышь, 20000 DPI, RGB', 4990.00, 30, 4),
+       ('Наушники Sony WH-1000XM5', 'Беспроводные, шумоподавление', 29990.00, 12, 5);
 
 -- ── Тестовый администратор ──
 -- Хеш для пароля 'admin123', сгенерированный через:

@@ -6,10 +6,10 @@
 //   $errors — массив ошибок валидации (может быть пустым)
 ?>
 
-    <h1>➕ Добавить новый товар</h1>
-    <br>
+<h1>➕ Добавить новый товар</h1>
+<br>
 
-    <!-- Показываем ошибки, если есть -->
+<!-- Показываем ошибки, если есть -->
 <?php
 if (!empty($errors)): ?>
     <div class="alert alert-danger">
@@ -25,7 +25,7 @@ if (!empty($errors)): ?>
 <?php
 endif; ?>
 
-    <div class="card">
+<div class="card">
     <!-- method="POST" — данные отправляются в теле запроса (безопасно) -->
     <!-- action="" — отправка на ту же страницу (index.php?action=create) -->
     <form method="POST" action="index.php?action=create">
@@ -48,6 +48,22 @@ endif; ?>
                       name="description"
                       placeholder="Подробное описание товара..."
             ><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category_id">Категория</label>
+            <select id="category_id" name="category_id"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px;">
+                <option value="0">-- Без категории --</option>
+                <?php
+                foreach ($categories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"
+                            <?= (int)($_POST['category_id'] ?? 0) === $cat['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cat['name']) ?>
+                    </option>
+                <?php
+                endforeach; ?>
+            </select>
         </div>
 
         <div class="form-group">
@@ -74,4 +90,4 @@ endif; ?>
         <button type="submit" class="btn btn-success">💾 Сохранить</button>
         <a href="index.php" class="btn btn-primary">← Назад</a>
     </form>
-    </div>
+</div>

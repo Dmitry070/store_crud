@@ -25,6 +25,10 @@ endif; ?>
             <td><?= htmlspecialchars($item['name']) ?></td>
         </tr>
         <tr>
+            <th>Категория</th>
+            <td><?= htmlspecialchars($item['category_name'] ?? 'Без категории') ?></td>
+        </tr>
+        <tr>
             <th>Описание</th>
             <td><?= nl2br(htmlspecialchars($item['description'] ?? 'Нет описания')) ?></td>
             <!-- nl2br() — заменяет переносы строк (\n) на HTML-тег <br> -->

@@ -81,6 +81,7 @@ else: ?>
         <tr>
             <th>ID</th>
             <th>Название</th>
+            <th>Категория</th>
             <th>Цена</th>
             <th>Кол-во</th>
             <th>Дата создания</th>
@@ -88,6 +89,7 @@ else: ?>
         </tr>
         </thead>
         <tbody>
+        <td><?= htmlspecialchars($item['category_name'] ?? 'Без категории') ?></td>
         <?php
         foreach ($products as $item): ?>
             <tr>

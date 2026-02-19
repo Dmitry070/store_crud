@@ -7,8 +7,8 @@
 //   $errors — массив ошибок валидации
 ?>
 
-    <h1>✏️ Редактировать: <?= htmlspecialchars($item['name']) ?></h1>
-    <br>
+<h1>✏️ Редактировать: <?= htmlspecialchars($item['name']) ?></h1>
+<br>
 
 <?php
 if (!empty($errors)): ?>
@@ -25,7 +25,7 @@ if (!empty($errors)): ?>
 <?php
 endif; ?>
 
-    <div class="card">
+<div class="card">
     <!-- Форма отправляется на edit с указанием id -->
     <form method="POST" action="index.php?action=edit&id=<?= $item['id'] ?>">
 
@@ -41,6 +41,22 @@ endif; ?>
             <textarea id="description"
                       name="description"
             ><?= htmlspecialchars($item['description'] ?? '') ?></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category_id">Категория</label>
+            <select id="category_id" name="category_id"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:16px;">
+                <option value="0">-- Без категории --</option>
+                <?php
+                foreach ($categories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"
+                            <?= (int)($item['category_id'] ?? 0) === $cat['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cat['name']) ?>
+                    </option>
+                <?php
+                endforeach; ?>
+            </select>
         </div>
 
         <div class="form-group">
@@ -60,4 +76,4 @@ endif; ?>
         <button type="submit" class="btn btn-warning">💾 Обновить</button>
         <a href="index.php?action=show&id=<?= $item['id'] ?>" class="btn btn-primary">← Назад</a>
     </form>
-    </div>
+</div>
