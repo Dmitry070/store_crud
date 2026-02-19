@@ -15,20 +15,31 @@ class ProductController
 
     public function index(): void
     {
-        // Получаем поисковый запрос из URL (например ?search=ноутбук)
         $search = trim($_GET['search'] ?? '');
+        $page = max(1, (int)($_GET['page'] ?? 1));  // Минимум 1
+        $perPage = 5;  // Товаров на странице
 
-        // Если есть запрос — ищем, иначе показываем все
         if ($search !== '') {
-            $products = $this->product->search($search);
+            // Поиск с пагинацией
+            $products = $this->product->searchPage($search, $page, $perPage);
+            $totalItems = $this->product->getSearchCount($search);
         } else {
-            $products = $this->product->getAll();
+            // Все товары с пагинацией
+            $products = $this->product->getPage($page, $perPage);
+            $totalItems = $this->product->getTotalCount();
         }
+
+        // Считаем общее количество страниц
+        // ceil() — округление вверх: 12 товаров / 5 на стр = 2.4 → 3 страницы
+        $totalPages = (int)ceil($totalItems / $perPage);
 
         $pageTitle = 'Список товаров';
         $this->render('list', [
             'products' => $products,
-            'search' => $search,  // передаём в шаблон, чтобы показать в поле
+            'search' => $search,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalItems' => $totalItems,
         ]);
     }
 
@@ -109,14 +120,14 @@ class ProductController
 
     public function delete(): void
     {
-        Auth::requireLogin();
+        Auth::requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = (int)($_GET['id'] ?? 0);
+            $id = (int)($_POST['id'] ?? 0);
             $this->product->delete($id);
         }
 
-        $this->redirect("index.php?action=list&success=delete");
+        $this->redirect("index.php?action=list&success=deleted");
     }
 
     private function getFormData(): array

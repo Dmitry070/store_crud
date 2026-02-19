@@ -4,7 +4,7 @@
 // ============================================
 ?>
 
-    <!-- Уведомления -->
+<!-- Уведомления -->
 <?php
 if (isset($_GET['success'])): ?>
     <div class="alert alert-success">
@@ -25,31 +25,31 @@ if (isset($_GET['success'])): ?>
 <?php
 endif; ?>
 
-    <!-- ========== ФОРМА ПОИСКА (НОВОЕ) ========== -->
-    <div class="card">
-        <form method="GET" action="index.php">
-            <!-- action=list передаём скрытым полем, чтобы роутер знал что делать -->
-            <input type="hidden" name="action" value="list">
+<!-- ========== ФОРМА ПОИСКА (НОВОЕ) ========== -->
+<div class="card">
+    <form method="GET" action="index.php">
+        <!-- action=list передаём скрытым полем, чтобы роутер знал что делать -->
+        <input type="hidden" name="action" value="list">
 
-            <div style="display: flex; gap: 10px;">
-                <input type="text"
-                       name="search"
-                       value="<?= htmlspecialchars($search ?? '') ?>"
-                       placeholder="🔍 Поиск по названию или описанию..."
-                       style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+        <div style="display: flex; gap: 10px;">
+            <input type="text"
+                   name="search"
+                   value="<?= htmlspecialchars($search ?? '') ?>"
+                   placeholder="🔍 Поиск по названию или описанию..."
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
 
-                <button type="submit" class="btn btn-primary">🔍 Найти</button>
+            <button type="submit" class="btn btn-primary">🔍 Найти</button>
 
-                <?php
-                if (!empty($search)): ?>
-                    <a href="index.php?action=list" class="btn btn-danger">✖ Сбросить</a>
-                <?php
-                endif; ?>
-            </div>
-        </form>
-    </div>
-    <br>
-    <!-- ========== КОНЕЦ ФОРМЫ ПОИСКА ========== -->
+            <?php
+            if (!empty($search)): ?>
+                <a href="index.php?action=list" class="btn btn-danger">✖ Сбросить</a>
+            <?php
+            endif; ?>
+        </div>
+    </form>
+</div>
+<br>
+<!-- ========== КОНЕЦ ФОРМЫ ПОИСКА ========== -->
 
 <?php
 if (!empty($search)): ?>
@@ -59,7 +59,7 @@ else: ?>
     <h1>📦 Все товары (<?= count($products) ?>)</h1>
 <?php
 endif; ?>
-    <br>
+<br>
 
 <?php
 if (empty($products)): ?>
@@ -124,5 +124,50 @@ else: ?>
         endforeach; ?>
         </tbody>
     </table>
+<?php
+endif; ?>
+<!-- ========== ПАГИНАЦИЯ ========== -->
+<?php
+if ($totalPages > 1): ?>
+    <div style="text-align: center; margin-top: 20px;">
+
+        <!-- Кнопка "Назад" -->
+        <?php
+        if ($page > 1): ?>
+            <a href="index.php?action=list&page=<?= $page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>"
+               class="btn btn-primary">← Назад</a>
+        <?php
+        endif; ?>
+
+        <!-- Номера страниц -->
+        <?php
+        for ($i = 1; $i <= $totalPages; $i++): ?>
+            <?php
+            if ($i === $page): ?>
+                <!-- Текущая страница — выделяем -->
+                <span class="btn btn-warning" style="cursor: default;">
+                    <strong><?= $i ?></strong>
+                </span>
+            <?php
+            else: ?>
+                <a href="index.php?action=list&page=<?= $i ?><?= $search ? '&search=' . urlencode($search) : '' ?>"
+                   class="btn btn-primary"><?= $i ?></a>
+            <?php
+            endif; ?>
+        <?php
+        endfor; ?>
+
+        <!-- Кнопка "Дальше" -->
+        <?php
+        if ($page < $totalPages): ?>
+            <a href="index.php?action=list&page=<?= $page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>"
+               class="btn btn-primary">Дальше →</a>
+        <?php
+        endif; ?>
+
+        <p style="color: #888; margin-top: 10px;">
+            Страница <?= $page ?> из <?= $totalPages ?> (всего товаров: <?= $totalItems ?>)
+        </p>
+    </div>
 <?php
 endif; ?>
